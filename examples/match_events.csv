@@ -1,0 +1,16 @@
+﻿minute,team,player,event_type,detail,xg
+12,BL,9 张伟,GOAL,助攻来自 7 李雷,0.35
+23,RH,10 马尔科,SHOT,被门将扑出,0.18
+34,RH,8 迭戈,GOAL,点球,0.79
+41,BL,4 王浩,YELLOW_CARD,战术犯规,
+45+2,BL,10 陈宇,GOAL,角球头球 助攻 7 李雷,0.28
+58,RH,11 卢卡,SHOT_ON_TARGET,击中门柱,0.42
+63,RH,7 健司,SUB_OUT,被 19 阿列克斯换下,
+63,RH,19 阿列克斯,SUB_IN,换下 7 健司,
+67,RH,5 托马什,RED_CARD,两黄变一红,
+71,BL,17 刘洋,SHOT,被门将扑出,0.31
+78,BL,9 张伟,SUB_OUT,被 20 赵蓬换下,
+78,BL,20 赵蓬,SUB_IN,换下 9 张伟,
+85,RH,19 阿列克斯,SHOT,偏出,0.15
+88,BL,20 赵蓬,GOAL,替补登场10分钟内建功,0.22
+90+3,BL,10 陈宇,PENALTY_MISSED,被门将扑出,0.65
