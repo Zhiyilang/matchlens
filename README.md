@@ -1,99 +1,110 @@
-# MatchLens — 可解释足球战报智能体（离线 · 零依赖）
+# MatchLens — An Explainable Match-Intelligence Agent (Offline · Zero-Dependency)
 
-粘贴一份比赛事件 CSV，MatchLens 以**可解释智能体**的方式跑完
-「感知 → 索引 → 检索 → 推理 → 解释 → 行动」闭环，产出：
+Paste in a match-events CSV and MatchLens runs a full **explainable agent loop** —
+PERCEIVE → INDEX → RETRIEVE → REASON → EXPLAIN → ACT — to produce:
 
-- **比分 + xG 对比**（机会质量，而非只看结果）
-- **关键节点时间线**（进球/失点/红牌/黄牌，带实时比分）
-- **数据洞察**（高效终结/挥霍机会/红牌连锁反应/替补奇兵/阶段压制/纪律数据）
-- **自然语言战报**（模板生成，每个数字可溯源）
-- **后续分析建议**（分析师视角的下一步）
+- **Scoreline + xG comparison** (chance quality, not just the result)
+- **Key-moment timeline** (goals / missed penalties / red cards, with live score)
+- **Data insights** (clinical finishing, wasted chances, man-down ripple effect,
+  super-sub impact, phase dominance, discipline)
+- **Natural-language recap** (template-generated, every number traceable)
+- **Next-step analysis suggestions** (an analyst's view of what to dig into)
 
-每条洞察都带**证据引用**（哪个文件、哪一行、第几分钟、哪个球员、xG 多少）。
+Every insight carries an **evidence citation** (which file, which row, which
+minute, which player, how much xG).
 
-- **零依赖**：纯 Python 标准库
-- **100% 离线**：比赛数据不出本机
-- **非黑箱**：规则透明，公式写在 README 里，可手工复核
+- **Zero dependencies**: pure Python standard library
+- **100% offline**: match data never leaves your machine
+- **Not a black box**: the rules are transparent, formulas are documented in this
+  README, everything is hand-verifiable
 
-## 快速开始
+## Quick Start
 
 ```bash
 python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --html report.html
 python eval.py
 ```
 
-事件 CSV 列：`minute,team,player,event_type,detail,xg`
-（`minute` 支持 `45+2` 补时写法；`xg` 可留空）
-球队 CSV 列：`code,name`
+Events CSV columns: `minute,team,player,event_type,detail,xg`
+(`minute` supports stoppage-time notation like `45+2`; `xg` may be empty)
+Teams CSV columns: `code,name`
 
-事件类型：`GOAL / SHOT / SHOT_ON_TARGET / PENALTY_MISSED / YELLOW_CARD / RED_CARD / SUB_IN / SUB_OUT`
+Event types: `GOAL / SHOT / SHOT_ON_TARGET / PENALTY_MISSED / YELLOW_CARD / RED_CARD / SUB_IN / SUB_OUT`
 
-## 真实 demo 输出（examples/match_events.csv）
+## Real Demo Output (examples/match_events.csv)
 
 ```
-比分: 蓝狮足球俱乐部 3 - 1 红鹰竞技
-  蓝狮: 3 球 | 射门 5 (射正 3) | xG 1.81 | 黄 1 红 0
-  红鹰: 1 球 | 射门 4 (射正 2) | xG 1.54 | 黄 0 红 1
-比赛形态: 比分悬殊但机会均等
+Score: Blue Lions FC 3 - 1 Red Eagles
+  Blue Lions: 3 goals | 5 shots (3 on target) | xG 1.81 | 1 yellow, 0 red
+  Red Eagles: 1 goal  | 4 shots (2 on target) | xG 1.54 | 0 yellow, 1 red
+Match shape: lopsided scoreline, evenly matched chances
 
-关键节点:
-   12' [进球  ] 蓝狮 张伟 进球（助攻来自 7 李雷）  (比分 1-0)
-   34' [进球  ] 红鹰 迭戈 进球（点球）  (比分 1-1)
-  45+2' [进球  ] 蓝狮 陈宇 进球（角球头球 助攻 7 李雷）  (比分 2-1)
-   67' [红牌  ] 红鹰 托马什 被红牌罚下（两黄变一红）
-   88' [进球  ] 蓝狮 赵蓬 进球（替补登场10分钟内建功）  (比分 3-1)
- 90+3' [失点  ] 蓝狮 陈宇 罚失点球（被门将扑出）
+Key moments:
+   12' [GOAL] Blue Lions Zhang Wei scores (assist by No.7 Li Lei)   (1-0)
+   34' [GOAL] Red Eagles Diego scores (penalty)                    (1-1)
+  45+2'[GOAL] Blue Lions Chen Yu scores (corner header, assist No.7 Li Lei) (2-1)
+   67' [RED ] Red Eagles Tomas sent off (second yellow)
+   88' [GOAL] Blue Lions Zhao Peng scores (10 minutes after coming on) (3-1)
+  90+3'[MISS] Blue Lions Chen Yu misses penalty (saved by the keeper)
 
-洞察:
-  * 高效终结: 蓝狮打进 3 球但 xG 仅 1.81（超额 +1.19）
-  * 挥霍机会: 红鹰 xG 1.54 却只进 1 球（缺口 -0.54）
-  * 红牌连锁反应: 红鹰 67' 被罚下后本队 xG 1.39->0.15，被对手 xG 0.63->1.18
-  * 替补奇兵: 蓝狮替补赵蓬 78' 登场，88' 即取得进球
-  * 阶段压制: 75-90 分钟区间蓝狮 xG 0.87，红鹰 0.15
-  * 纪律数据: 蓝狮 1 黄 0 红；红鹰 0 黄 1 红
+Insights:
+  * Clinical finishing: Blue Lions scored 3 from xG 1.81 (surplus +1.19)
+  * Wasted chances: Red Eagles xG 1.54 produced only 1 goal (gap -0.54)
+  * Man-down ripple effect: after Red Eagles' 67' red card, their xG fell 1.39->0.15
+    while the opponent's rose 0.63->1.18
+  * Super-sub impact: Blue Lions sub Zhao Peng came on at 78' and scored at 88'
+  * Phase dominance: 75-90 minute window, Blue Lions xG 0.87 vs 0.15
+  * Discipline: Blue Lions 1 yellow 0 red; Red Eagles 0 yellow 1 red
 
-战报: 蓝狮足球俱乐部 3-1 红鹰竞技。进球序列：12' 蓝狮 张伟 进球（助攻来自 7 李雷）；
-34' 红鹰 迭戈 进球（点球）；45+2' 蓝狮 陈宇 进球（角球头球 助攻 7 李雷）；
-88' 蓝狮 赵蓬 进球（替补登场10分钟内建功）。xG 1.81-1.54，两队创造的机会几乎均等，
-比分差距主要来自终结效率。红鹰 67' 被红牌罚下（托马什），此后长时间少打一人。
-替补赵蓬 78' 登场，88' 建功，成为胜负手之一。90+3' 蓝狮罚失点球（陈宇），悬念留到最后。
+Recap: Blue Lions FC 3-1 Red Eagles. Scoring sequence: 12' Zhang Wei (assist No.7
+Li Lei); 34' Diego penalty; 45+2' Chen Yu corner header (assist No.7 Li Lei);
+88' Zhao Peng (10 minutes after coming on). xG 1.81-1.54: both teams created
+almost identical chances; the margin came from finishing efficiency. Red Eagles
+played a man down from 67' (Tomas). Sub Zhao Peng (78') scored at 88' and became
+one of the decisive differences. Chen Yu's 90+3' penalty miss kept the suspense
+alive to the end.
 ```
 
-## 规则与公式（透明可复核）
+*(Team and player names above are English renderings of the bundled sample data.)*
 
-| 洞察 | 规则 |
+## Rules & Formulas (transparent, auditable)
+
+| Insight | Rule |
 |---|---|
-| `CLINICAL_FINISHING` | 进球数 − xG ≥ +0.5（终结效率高于机会质量） |
-| `WASTEFUL_ATTACK` | 进球数 − xG ≤ −0.5（挥霍机会） |
-| `MAN_DOWN_EFFECT` | 红牌前后 15 分钟窗口的本队/对手 xG 变化 |
-| `SUB_IMPACT` | 换人后 12 分钟内同队进球 |
-| `MOMENTUM_PHASE` | 15 分钟区间 xG 分箱，双方差值 ≥ 0.4 的最大区间 |
-| `DISCIPLINE` | 黄/红牌计数汇总 |
+| `CLINICAL_FINISHING` | goals − xG ≥ +0.5 (finishing above chance quality) |
+| `WASTEFUL_ATTACK` | goals − xG ≤ −0.5 (chances wasted) |
+| `MAN_DOWN_EFFECT` | team/opponent xG change in the 15-minute window around a red card |
+| `SUB_IMPACT` | same-team goal within 12 minutes of a substitution |
+| `MOMENTUM_PHASE` | 15-minute xG bins; the window with the largest inter-team gap ≥ 0.4 |
+| `DISCIPLINE` | yellow/red card tallies |
 
-射门 = `GOAL/OWN_GOAL/SHOT/SHOT_ON_TARGET/PENALTY_MISSED` 事件数；
-射正 = `GOAL/SHOT_ON_TARGET`；xG = 以上事件的 `xg` 求和。
+Shots = count of `GOAL/OWN_GOAL/SHOT/SHOT_ON_TARGET/PENALTY_MISSED`;
+on target = `GOAL/SHOT_ON_TARGET`; xG = sum of the `xg` field over those events.
 
-## 智能体闭环
+## The Agent Loop
 
 ```
-PERCEIVE  读取事件流与球队名
-INDEX     按分钟排序，建立球员/事件类型/xG 索引
-RETRIEVE  统计射门/xG/纪律/换人，执行 5 类洞察规则
-REASON    比分走势 + xG 对比，判定比赛形态
-EXPLAIN   生成洞察（附证据引用）+ 自然语言战报
-ACT       给出后续分析建议
+PERCEIVE  read the event stream and team names
+INDEX     sort by minute; build player / event-type / xG indexes
+RETRIEVE  tally shots / xG / discipline / subs; run 5 insight rules
+REASON    score progression + xG comparison to judge match shape
+EXPLAIN   emit insights (with evidence citations) + natural-language recap
+ACT       produce next-step analysis suggestions
 ```
 
-## 参赛信息
+## Contest Entry
 
-为 **Microsoft × Premier League「Inside the Game: Developer Hackathon」**
-（$50,000 现金奖池）构建：把比赛事件数据转化为**可解释的赛事情报与自动战报**，
-零依赖、可离线、结论可溯源。评测见 `eval.py`（19 条断言全 PASS）。
+Built for **Microsoft × Premier League "Inside the Game: Developer Hackathon"**
+($50,000 cash prize pool): turning match-event data into **explainable match
+intelligence and automated recaps** — zero-dependency, offline-capable, fully
+traceable conclusions. See `eval.py` (19 assertions, all PASS).
 
-## 免责声明
+## Disclaimer
 
-本工具基于事件数据生成分析，不构成任何投注建议。
+This tool generates analysis from event data and is not betting advice.
 
 ## License
 
 MIT
+
+中文说明见 [README.zh.md](README.zh.md)。
