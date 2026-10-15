@@ -3,10 +3,15 @@
 Agent loop: PERCEIVE -> INDEX -> RETRIEVE -> REASON -> EXPLAIN -> ACT
 Reads a match events CSV, computes stats, extracts key moments, runs insight
 rules, and generates a cited natural-language recap. No network, no deps.
+
+All user-visible prose goes through i18n.t(lang, ...) so the same analysis
+can be rendered in Chinese or English (see --lang).
 """
 from __future__ import annotations
 
 import csv
+
+from . import i18n
 
 _SHOT_TYPES = ("GOAL", "OWN_GOAL", "SHOT", "SHOT_ON_TARGET", "PENALTY_MISSED")
 _SOT_TYPES = ("GOAL", "SHOT_ON_TARGET")
@@ -102,40 +107,43 @@ def compute_stats(events):
     return stats
 
 
-def extract_moments(events):
+def extract_moments(events, lang="zh"):
     moments = []
     score = {e["team"]: 0 for e in events}
     for e in events:
         if e["type"] == "GOAL":
             score[e["team"]] = score.get(e["team"], 0) + 1
+            key = "moment_goal_detail" if e["detail"] else "moment_goal"
             moments.append({
                 "minute": e["minute"], "minute_raw": e["minute_raw"],
                 "kind": "GOAL", "team": e["team"], "key": True,
-                "text": f"{e['player']} 进球" + (f"（{e['detail']}）" if e["detail"] else ""),
+                "text": i18n.t(lang, key, player=e["player"], detail=e["detail"]),
                 "score": dict(score), "cite": _cite(e)})
         elif e["type"] == "PENALTY_MISSED":
+            key = "moment_pen_miss_detail" if e["detail"] else "moment_pen_miss"
             moments.append({
                 "minute": e["minute"], "minute_raw": e["minute_raw"],
                 "kind": "PEN_MISS", "team": e["team"], "key": True,
-                "text": f"{e['player']} 罚失点球（{e['detail']}）" if e["detail"]
-                        else f"{e['player']} 罚失点球",
+                "text": i18n.t(lang, key, player=e["player"], detail=e["detail"]),
                 "score": dict(score), "cite": _cite(e)})
         elif e["type"] == "RED_CARD":
+            key = "moment_red_detail" if e["detail"] else "moment_red"
             moments.append({
                 "minute": e["minute"], "minute_raw": e["minute_raw"],
                 "kind": "RED", "team": e["team"], "key": True,
-                "text": f"{e['player']} 被红牌罚下" + (f"（{e['detail']}）" if e["detail"] else ""),
+                "text": i18n.t(lang, key, player=e["player"], detail=e["detail"]),
                 "score": dict(score), "cite": _cite(e)})
         elif e["type"] == "YELLOW_CARD":
+            key = "moment_yellow_detail" if e["detail"] else "moment_yellow"
             moments.append({
                 "minute": e["minute"], "minute_raw": e["minute_raw"],
                 "kind": "YELLOW", "team": e["team"], "key": False,
-                "text": f"{e['player']} 黄牌" + (f"（{e['detail']}）" if e["detail"] else ""),
+                "text": i18n.t(lang, key, player=e["player"], detail=e["detail"]),
                 "score": dict(score), "cite": _cite(e)})
     return moments
 
 
-def run_rules(events, stats, names):
+def run_rules(events, stats, names, lang="zh"):
     out = []
     teams = sorted(stats)
 
@@ -148,14 +156,16 @@ def run_rules(events, stats, names):
                   if e["team"] == t and e["type"] in _SHOT_TYPES][:5]
             if diff >= 0.5:
                 out.append(_finding(
-                    "CLINICAL_FINISHING", "高效终结",
-                    f"{names.get(t, t)} 打进 {s['goals']} 球但 xG 仅 {s['xg']:.2f}"
-                    f"（超额 +{diff:.2f}）——临门一脚明显高于平均水准。", ev, diff))
+                    "CLINICAL_FINISHING", i18n.t(lang, "rule_clinical"),
+                    i18n.t(lang, "detail_clinical", name=names.get(t, t),
+                           goals=s["goals"], xg=f"{s['xg']:.2f}", diff=f"{diff:.2f}"),
+                    ev, diff))
             elif diff <= -0.5:
                 out.append(_finding(
-                    "WASTEFUL_ATTACK", "挥霍机会",
-                    f"{names.get(t, t)} xG {s['xg']:.2f} 却只进 {s['goals']} 球"
-                    f"（缺口 {diff:.2f}）——机会质量不差，转化率拖后腿。", ev, diff))
+                    "WASTEFUL_ATTACK", i18n.t(lang, "rule_wasteful"),
+                    i18n.t(lang, "detail_wasteful", name=names.get(t, t),
+                           goals=s["goals"], xg=f"{s['xg']:.2f}", diff=f"{diff:.2f}"),
+                    ev, diff))
 
     # R2 man-down effect after a red card ---------------------------------------
     reds = [e for e in events if e["type"] == "RED_CARD"]
@@ -169,9 +179,10 @@ def run_rules(events, stats, names):
         xf_b = sum(e["xg"] for e in before if e["team"] == r["team"])
         xa_b = sum(e["xg"] for e in before if e["team"] != r["team"])
         out.append(_finding(
-            "MAN_DOWN_EFFECT", "红牌连锁反应",
-            f"{names.get(r['team'], r['team'])} {r['minute_raw']}' 被罚下后："
-            f"本队 xG {xf_b:.2f}->{xf_a:.2f}，被对手 xG {xa_b:.2f}->{xa_a:.2f}。",
+            "MAN_DOWN_EFFECT", i18n.t(lang, "rule_man_down"),
+            i18n.t(lang, "detail_man_down", name=names.get(r["team"], r["team"]),
+                   minute=r["minute_raw"], xb=f"{xf_b:.2f}", xa=f"{xf_a:.2f}",
+                   ob=f"{xa_b:.2f}", oa=f"{xa_a:.2f}"),
             [_cite(r)] + [_cite(e) for e in after][:4],
             xf_a + xa_a))
 
@@ -182,9 +193,10 @@ def run_rules(events, stats, names):
                 if (x["team"] == e["team"] and x["type"] == "GOAL"
                         and (x["minute"] or 0) - (e["minute"] or 0) <= 12):
                     out.append(_finding(
-                        "SUB_IMPACT", "替补奇兵",
-                        f"{names.get(e['team'], e['team'])} 替补 {e['player']} "
-                        f"{e['minute_raw']}' 登场，{x['minute_raw']}' 即取得进球。",
+                        "SUB_IMPACT", i18n.t(lang, "rule_sub_impact"),
+                        i18n.t(lang, "detail_sub_impact", name=names.get(e["team"], e["team"]),
+                               player=e["player"], minute=e["minute_raw"],
+                               gminute=x["minute_raw"]),
                         [_cite(e), _cite(x)],
                         (x["minute"] or 0) - (e["minute"] or 0)))
                     break
@@ -208,9 +220,10 @@ def run_rules(events, stats, names):
         d = bins[best_b]
         other = [t for t in sorted(d) if t != best_lead][0]
         out.append(_finding(
-            "MOMENTUM_PHASE", "阶段压制",
-            f"{best_b}-{best_b + 15} 分钟区间 {names.get(best_lead, best_lead)} "
-            f"xG {d[best_lead]:.2f}，对手 {d[other]:.2f}——该阶段明显占优。",
+            "MOMENTUM_PHASE", i18n.t(lang, "rule_momentum"),
+            i18n.t(lang, "detail_momentum", b=best_b, be=best_b + 15,
+                   name=names.get(best_lead, best_lead), xa=f"{d[best_lead]:.2f}",
+                   xb=f"{d[other]:.2f}"),
             [_cite(e) for e in events
              if e["xg"] is not None
              and int(min(e["minute"] or 0.0, 89.99) // 15) * 15 == best_b][:5],
@@ -220,101 +233,96 @@ def run_rules(events, stats, names):
     y = sum(s["yellow"] for s in stats.values())
     r_ = sum(s["red"] for s in stats.values())
     if y or r_:
-        parts = [f"{names.get(t, t)} {stats[t]['yellow']} 黄 {stats[t]['red']} 红"
-                 for t in teams]
+        parts = "；".join(
+            i18n.t(lang, "detail_discipline_part", name=names.get(t, t),
+                   y=stats[t]["yellow"], r=stats[t]["red"])
+            for t in teams)
         out.append(_finding(
-            "DISCIPLINE", "纪律数据",
-            "；".join(parts) + f"（全场共 {y} 黄 {r_} 红）。",
+            "DISCIPLINE", i18n.t(lang, "rule_discipline"),
+            i18n.t(lang, "detail_discipline", parts=parts, y=y, r=r_),
             [_cite(e) for e in events
              if e["type"] in ("YELLOW_CARD", "RED_CARD")][:5],
             float(y + r_ * 2)))
     return out
 
 
-def competitiveness(stats):
+def competitiveness(stats, lang="zh"):
     ts = sorted(stats, key=lambda t: (-stats[t]["goals"], t))
     gd = abs(stats[ts[0]]["goals"] - stats[ts[1]]["goals"])
     xd = abs(stats[ts[0]]["xg"] - stats[ts[1]]["xg"])
     if gd == 0:
-        return "平局收场"
+        return i18n.t(lang, "shape_draw")
     if gd == 1:
-        return "一击之差"
+        return i18n.t(lang, "shape_one_goal")
     if xd <= 0.5:
-        return "比分悬殊但机会均等"
-    return "一边倒"
+        return i18n.t(lang, "shape_lopsided")
+    return i18n.t(lang, "shape_onesided")
 
 
-def build_recap(events, stats, names, moments):
+def build_recap(events, stats, names, moments, lang="zh"):
     teams = sorted(stats, key=lambda t: (-stats[t]["goals"], -stats[t]["xg"], t))
     hi, lo = teams[0], teams[1]
     hs, ls = stats[hi], stats[lo]
-    parts = [f"{names.get(hi, hi)} {hs['goals']}-{ls['goals']} {names.get(lo, lo)}。"]
+    parts = [i18n.t(lang, "recap_opener", hi=names.get(hi, hi), hg=hs["goals"],
+                    lg=ls["goals"], lo=names.get(lo, lo))]
     goals = [m for m in moments if m["kind"] == "GOAL"]
     if goals:
         seq = "；".join(
-            f"{m['minute_raw']}' {names.get(m['team'], m['team'])} {m['text']}"
+            i18n.t(lang, "recap_goal_item", minute=m["minute_raw"],
+                   team=names.get(m["team"], m["team"]), text=m["text"])
             for m in goals)
-        parts.append(f"进球序列：{seq}。")
+        parts.append(i18n.t(lang, "recap_goals_seq", seq=seq))
     xd = abs(hs["xg"] - ls["xg"])
     if xd <= 0.5:
-        parts.append(f"xG {hs['xg']:.2f}-{ls['xg']:.2f}，两队创造的机会几乎均等，"
-                     "比分差距主要来自终结效率。")
+        parts.append(i18n.t(lang, "recap_xg_even", hx=f"{hs['xg']:.2f}",
+                            lx=f"{ls['xg']:.2f}"))
     else:
         lead = hi if hs["xg"] >= ls["xg"] else lo
-        parts.append(f"xG {hs['xg']:.2f}-{ls['xg']:.2f}，"
-                     f"{names.get(lead, lead)} 在机会质量上占优。")
+        parts.append(i18n.t(lang, "recap_xg_lead", hx=f"{hs['xg']:.2f}",
+                            lx=f"{ls['xg']:.2f}", lead=names.get(lead, lead)))
     reds = [e for e in events if e["type"] == "RED_CARD"]
     if reds:
         r = reds[0]
-        parts.append(f"{names.get(r['team'], r['team'])} {r['minute_raw']}' "
-                     f"被红牌罚下（{r['player']}），此后长时间少打一人。")
+        parts.append(i18n.t(lang, "recap_red", team=names.get(r["team"], r["team"]),
+                            minute=r["minute_raw"], player=r["player"]))
     for i, e in enumerate(events):
         if e["type"] == "SUB_IN":
             for x in events[i + 1:]:
                 if (x["team"] == e["team"] and x["type"] == "GOAL"
                         and (x["minute"] or 0) - (e["minute"] or 0) <= 12):
-                    parts.append(f"替补 {e['player']} {e['minute_raw']}' 登场，"
-                                 f"{x['minute_raw']}' 建功，成为胜负手之一。")
+                    parts.append(i18n.t(lang, "recap_sub", player=e["player"],
+                                        minute=e["minute_raw"],
+                                        gminute=x["minute_raw"]))
                     break
     pens = [e for e in events if e["type"] == "PENALTY_MISSED"]
     if pens:
         p = pens[0]
-        parts.append(f"{p['minute_raw']}' {names.get(p['team'], p['team'])} "
-                     f"罚失点球（{p['player']}），悬念留到最后。")
+        parts.append(i18n.t(lang, "recap_pen", minute=p["minute_raw"],
+                            team=names.get(p["team"], p["team"]), player=p["player"]))
     return "".join(parts)
 
 
-NEXT_ACTIONS = [
-    "把本场射门事件拆到球员维度，做 xG 贡献排名",
-    "对比赛季场均 xG/射门数，判断本场是否属于异常高效/低效",
-    "若有传球与站位数据，补传球网络与助攻链分析",
-    "对红牌、点球等关键节点回放录像，复核判罚与站位选择",
-]
-
-
-def analyze(events_path, teams_path=None, question=None):
+def analyze(events_path, teams_path=None, question=None, lang="zh"):
     events = load_events(events_path)
     names = load_teams(teams_path) if teams_path else {}
     stats = compute_stats(events)
-    moments = extract_moments(events)
-    insights = run_rules(events, stats, names)
-    label = competitiveness(stats)
-    recap = build_recap(events, stats, names, moments)
+    moments = extract_moments(events, lang)
+    insights = run_rules(events, stats, names, lang)
+    label = competitiveness(stats, lang)
+    recap = build_recap(events, stats, names, moments, lang)
+    nexts = i18n.next_actions(lang)
 
     steps = [
-        ("PERCEIVE", f"读取 {len(events)} 个比赛事件 | 球队 "
-                     f"{', '.join(names.get(t, t) for t in sorted(stats))}"),
-        ("INDEX", f"按分钟排序，建立球员/事件类型/xG 索引，"
-                  f"识别 {len(moments)} 个关键节点"),
-        ("RETRIEVE", f"统计射门/xG/纪律/换人数据，执行 5 类洞察规则，"
-                     f"命中 {len(insights)} 条"),
-        ("REASON", f"计算比分走势与 xG 对比，判定比赛形态：{label}"),
-        ("EXPLAIN", f"生成 {len(insights)} 条洞察（每条附证据引用）"
-                    "与自然语言战报"),
-        ("ACT", f"给出 {len(NEXT_ACTIONS)} 条后续分析建议"),
+        ("PERCEIVE", i18n.t(lang, "step_perceive", n=len(events),
+                            teams=", ".join(names.get(t, t) for t in sorted(stats)))),
+        ("INDEX", i18n.t(lang, "step_index", n=len(moments))),
+        ("RETRIEVE", i18n.t(lang, "step_retrieve", n=len(insights))),
+        ("REASON", i18n.t(lang, "step_reason", label=label)),
+        ("EXPLAIN", i18n.t(lang, "step_explain", n=len(insights))),
+        ("ACT", i18n.t(lang, "step_act", n=len(nexts))),
     ]
 
     return {"question": question, "events": len(events), "stats": stats,
             "names": names, "moments": moments, "insights": insights,
             "label": label, "recap": recap, "steps": steps,
-            "next_actions": NEXT_ACTIONS}
+            "next_actions": nexts, "lang": lang}
