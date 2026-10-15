@@ -209,6 +209,48 @@ with tempfile.TemporaryDirectory() as td:
           p_html.returncode == 0 and os.path.exists(os.path.join(td, "cli.html")))
 
 # ===========================================================================
+# web demo: real HTTP server, bilingual pages
+# ===========================================================================
+import threading  # noqa: E402
+import urllib.error  # noqa: E402
+import urllib.request  # noqa: E402
+from http.server import ThreadingHTTPServer  # noqa: E402
+
+import app as app_mod  # noqa: E402
+
+_srv = ThreadingHTTPServer(("127.0.0.1", 0), app_mod.Handler)
+_port = _srv.server_address[1]
+_t = threading.Thread(target=_srv.serve_forever, daemon=True)
+_t.start()
+try:
+    def _get(path):
+        try:
+            with urllib.request.urlopen("http://127.0.0.1:%d%s" % (_port, path), timeout=10) as r:
+                return r.status, r.read().decode("utf-8")
+        except urllib.error.HTTPError as e:
+            return e.code, e.read().decode("utf-8", "replace")
+
+    code, home_zh = _get("/")
+    check("web / 返回 200", code == 200)
+    check("web / 含标题与行动按钮", "MatchLens" in home_zh and "/report" in home_zh)
+    code, home_en = _get("/?lang=en")
+    check("web /?lang=en 英文界面", code == 200 and "Explainable Match-Intelligence" in home_en)
+    code, home_bad = _get("/?lang=fr")
+    check("web 坏 lang 回退中文", code == 200 and "可解释比赛情报智能体" in home_bad)
+    code, rep_en = _get("/report?lang=en")
+    check("web /report 英文报告", code == 200 and "MatchLens" in rep_en and "xG" in rep_en)
+    code, rep_zh = _get("/report?lang=zh")
+    check("web /report 中文报告", code == 200 and "MatchLens" in rep_zh)
+    code, live_zh = _get("/live?lang=zh")
+    check("web /live 播报实录非空", code == 200 and len(live_zh) > 2000)
+    code, hz = _get("/healthz")
+    check("web /healthz", code == 200 and hz.strip() == "ok")
+    code, _ = _get("/nope")
+    check("web 404 处理", code == 404)
+finally:
+    _srv.shutdown()
+
+# ===========================================================================
 failed = [n for n, ok in checks if not ok]
 for n, ok in checks:
     print(f"[{'PASS' if ok else 'FAIL'}] {n}")
