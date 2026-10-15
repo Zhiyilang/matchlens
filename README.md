@@ -1,5 +1,9 @@
 # MatchLens — An Explainable Match-Intelligence Agent (Offline · Zero-Dependency)
 
+[![CI](https://github.com/Zhiyilang/matchlens/actions/workflows/ci.yml/badge.svg)](https://github.com/Zhiyilang/matchlens/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+
 Paste in a match-events CSV and MatchLens runs a full **explainable agent loop** —
 PERCEIVE → INDEX → RETRIEVE → REASON → EXPLAIN → ACT — to produce:
 
@@ -17,11 +21,29 @@ minute, which player, how much xG).
 - **100% offline**: match data never leaves your machine
 - **Not a black box**: the rules are transparent, formulas are documented in this
   README, everything is hand-verifiable
+- **Bilingual output**: `--lang zh|en` — all prose flows through an i18n layer
+  (for broadcast/studio rollouts to international audiences)
+- **Real-time narration**: `--live` commentates the event stream as it arrives —
+  15-minute xG updates, halftime and full-time summaries, auto-recap
+- **Synthetic data**: `--gen SEED` deterministically manufactures a whole match
+  (expand the evaluation dataset without any external feed)
 
 ## Quick Start
 
 ```bash
+# Batch analysis (writes an HTML report)
 python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --html report.html
+
+# Real-time narration (broadcast style; --delay sets the pace)
+python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --live --delay 0.05
+
+# English output
+python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --lang en
+
+# Generate a fresh synthetic match (seed 7 is deterministic)
+python -m matchlens.cli --gen 7 --out examples/generated_match.csv --teams-out examples/generated_teams.csv
+
+# Evaluation suite
 python eval.py
 ```
 
@@ -31,41 +53,18 @@ Teams CSV columns: `code,name`
 
 Event types: `GOAL / SHOT / SHOT_ON_TARGET / PENALTY_MISSED / YELLOW_CARD / RED_CARD / SUB_IN / SUB_OUT`
 
-## Real Demo Output (examples/match_events.csv)
+## Live narration sample (--live)
 
 ```
-Score: Blue Lions FC 3 - 1 Red Eagles
-  Blue Lions: 3 goals | 5 shots (3 on target) | xG 1.81 | 1 yellow, 0 red
-  Red Eagles: 1 goal  | 4 shots (2 on target) | xG 1.54 | 0 yellow, 1 red
-Match shape: lopsided scoreline, evenly matched chances
-
-Key moments:
-   12' [GOAL] Blue Lions Zhang Wei scores (assist by No.7 Li Lei)   (1-0)
-   34' [GOAL] Red Eagles Diego scores (penalty)                    (1-1)
-  45+2'[GOAL] Blue Lions Chen Yu scores (corner header, assist No.7 Li Lei) (2-1)
-   67' [RED ] Red Eagles Tomas sent off (second yellow)
-   88' [GOAL] Blue Lions Zhao Peng scores (10 minutes after coming on) (3-1)
-  90+3'[MISS] Blue Lions Chen Yu misses penalty (saved by the keeper)
-
-Insights:
-  * Clinical finishing: Blue Lions scored 3 from xG 1.81 (surplus +1.19)
-  * Wasted chances: Red Eagles xG 1.54 produced only 1 goal (gap -0.54)
-  * Man-down ripple effect: after Red Eagles' 67' red card, their xG fell 1.39->0.15
-    while the opponent's rose 0.63->1.18
-  * Super-sub impact: Blue Lions sub Zhao Peng came on at 78' and scored at 88'
-  * Phase dominance: 75-90 minute window, Blue Lions xG 0.87 vs 0.15
-  * Discipline: Blue Lions 1 yellow 0 red; Red Eagles 0 yellow 1 red
-
-Recap: Blue Lions FC 3-1 Red Eagles. Scoring sequence: 12' Zhang Wei (assist No.7
-Li Lei); 34' Diego penalty; 45+2' Chen Yu corner header (assist No.7 Li Lei);
-88' Zhao Peng (10 minutes after coming on). xG 1.81-1.54: both teams created
-almost identical chances; the margin came from finishing efficiency. Red Eagles
-played a man down from 67' (Tomas). Sub Zhao Peng (78') scored at 88' and became
-one of the decisive differences. Chen Yu's 90+3' penalty miss kept the suspense
-alive to the end.
+⚽ 12' GOAL! Blue Lions FC No.9 Zhang Wei (assist by No.7 Li Lei) (score 1-0)
+⏱ 15-30' xG update: Blue Lions FC 0.35, Red Eagles 0.18
+⚽ 34' GOAL! Red Eagles No.8 Diego (penalty) (score 1-1)
+🪑 Halftime: 1-1 | xG Blue Lions FC 0.63, Red Eagles 0.97
+🟥 67' Red Eagles No.5 Tomas is sent off! (second yellow)
+⚽ 88' GOAL! Blue Lions FC No.20 Zhao Peng (scored within 10 minutes of coming on) (score 3-1)
+🏁 Full time: 3-1 | xG Blue Lions FC 1.81, Red Eagles 1.54 | shots Blue Lions FC 5, Red Eagles 4
+📝 Auto-recap: Blue Lions FC 3-1 Red Eagles. Scoring sequence: ...
 ```
-
-*(Team and player names above are English renderings of the bundled sample data.)*
 
 ## Rules & Formulas (transparent, auditable)
 
@@ -92,12 +91,29 @@ EXPLAIN   emit insights (with evidence citations) + natural-language recap
 ACT       produce next-step analysis suggestions
 ```
 
+## Tests & quality
+
+`python eval.py` → **70 assertions passing**: demo-match analysis, i18n
+parity, English rendering, the live narrator (score progression / single
+halftime call / deterministic replay), the synthetic generator
+(byte-identical per seed / round-trip analysis / realistic volume), and the
+CLI end-to-end via real subprocesses (zh/en/live/gen/HTML/exit codes).
+CI runs the same suite on Python 3.10 / 3.11 / 3.12.
+
 ## Contest Entry
 
-Built for **Microsoft × Premier League "Inside the Game: Developer Hackathon"**
-($50,000 cash prize pool): turning match-event data into **explainable match
-intelligence and automated recaps** — zero-dependency, offline-capable, fully
-traceable conclusions. See `eval.py` (19 assertions, all PASS).
+Built for the **Microsoft × Premier League "Inside the Game: Developer
+Hackathon"** (**$50,000 cash prize pool**). Key facts:
+
+- **Registration closes 2026-10-20 12:00 PT**; build window Oct 6–27;
+  **submission deadline Oct 27, 11:59 PM PT**; top six notified Nov 10
+- Brief: turn synthetic football data into **explainable match intelligence,
+  real-time narratives, and automated recaps** for studio/broadcast/streaming
+- MatchLens coverage: explainable intelligence (xG + 6 insight families +
+  evidence citations) ✓, real-time narratives (`--live`) ✓, automated recaps
+  (template-generated, traceable) ✓, multiple languages (`--lang en`) ✓,
+  dataset expansion (`--gen`) ✓
+- Register: msft.it/6016aY5LY (Innovation Studio platform)
 
 ## Disclaimer
 
