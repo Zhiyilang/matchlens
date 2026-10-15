@@ -23,6 +23,30 @@ PY = sys.executable
 DEMO_EV = os.path.join(HERE, "examples", "match_events.csv")
 DEMO_TEAMS = os.path.join(HERE, "examples", "teams.csv")
 
+
+def runpy(args, **kw):
+    """Run a child interpreter over a deterministic UTF-8 pipe.
+
+    Without this, `python eval.py` crashes on a cp936 Windows locale: the
+    child emits UTF-8 bytes while the parent's reader thread decodes with the
+    locale codec, the reader dies with UnicodeDecodeError, and stdout silently
+    becomes None — surfacing much later as a confusing TypeError. Forcing
+    PYTHONUTF8/PYTHONIOENCODING on the child and decoding explicitly as UTF-8
+    makes the suite locale-independent.
+    """
+    import os
+    env = dict(os.environ)
+    env["PYTHONUTF8"] = "1"
+    env["PYTHONIOENCODING"] = "utf-8"
+    kw.setdefault("capture_output", True)
+    kw.setdefault("text", True)
+    kw.setdefault("encoding", "utf-8")
+    kw.setdefault("errors", "replace")
+    kw.setdefault("timeout", 60)
+    kw.setdefault("cwd", HERE)
+    kw.setdefault("env", env)
+    return subprocess.run([PY] + list(args), **kw)
+
 checks = []
 
 
@@ -170,19 +194,19 @@ with tempfile.TemporaryDirectory() as td:
     # =========================================================================
     # 7. CLI end-to-end (real subprocesses)
     # =========================================================================
-    p = subprocess.run([PY, "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS],
+    p = runpy([ "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS],
                        capture_output=True, text=True, timeout=30, cwd=HERE)
     check("CLI 默认中文退出 0", p.returncode == 0)
     check("CLI 中文输出含进球与战报", "进球" in p.stdout and "战报" in p.stdout)
 
-    p_en = subprocess.run([PY, "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS,
+    p_en = runpy([ "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS,
                            "--lang", "en"], capture_output=True, text=True,
                           timeout=30, cwd=HERE)
     check("CLI --lang en 退出 0", p_en.returncode == 0)
     check("CLI 英文输出含 Recap 与 GOAL", "Recap" in p_en.stdout and "GOAL" in p_en.stdout)
     check("CLI 英文输出无中文标题", "自然语言战报" not in p_en.stdout)
 
-    p_live = subprocess.run([PY, "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS,
+    p_live = runpy([ "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS,
                              "--live", "--lang", "en"], capture_output=True, text=True,
                             timeout=30, cwd=HERE)
     check("CLI --live 退出 0", p_live.returncode == 0)
@@ -191,7 +215,7 @@ with tempfile.TemporaryDirectory() as td:
     check("CLI --live 英文无全角标点泄漏",
           not any(c in p_live.stdout for c in "；，。：（）"))
 
-    p_gen = subprocess.run([PY, "-m", "matchlens.cli", "--gen", "42",
+    p_gen = runpy([ "-m", "matchlens.cli", "--gen", "42",
                             "--out", os.path.join(td, "cli_gen.csv"),
                             "--teams-out", os.path.join(td, "cli_gen_teams.csv")],
                            capture_output=True, text=True, timeout=30, cwd=HERE)
@@ -200,11 +224,11 @@ with tempfile.TemporaryDirectory() as td:
           os.path.exists(os.path.join(td, "cli_gen.csv"))
           and core.analyze(os.path.join(td, "cli_gen.csv"))["events"] > 0)
 
-    p_bad = subprocess.run([PY, "-m", "matchlens.cli"],
+    p_bad = runpy([ "-m", "matchlens.cli"],
                            capture_output=True, text=True, timeout=30, cwd=HERE)
     check("CLI 无参数报错退出非 0", p_bad.returncode != 0)
 
-    p_html = subprocess.run([PY, "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS,
+    p_html = runpy([ "-m", "matchlens.cli", DEMO_EV, "--teams", DEMO_TEAMS,
                              "--lang", "en", "--html", os.path.join(td, "cli.html")],
                             capture_output=True, text=True, timeout=30, cwd=HERE)
     check("CLI --html 生成英文报告",
