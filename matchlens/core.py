@@ -267,7 +267,7 @@ def build_recap(events, stats, names, moments, lang="zh"):
                     lg=ls["goals"], lo=names.get(lo, lo))]
     goals = [m for m in moments if m["kind"] == "GOAL"]
     if goals:
-        seq = "；".join(
+        seq = ("；" if lang == "zh" else "; ").join(
             i18n.t(lang, "recap_goal_item", minute=m["minute_raw"],
                    team=names.get(m["team"], m["team"]), text=m["text"])
             for m in goals)
