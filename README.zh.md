@@ -1,5 +1,9 @@
 # MatchLens — 可解释足球战报智能体（离线 · 零依赖）
 
+[![CI](https://github.com/Zhiyilang/matchlens/actions/workflows/ci.yml/badge.svg)](https://github.com/Zhiyilang/matchlens/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+
 粘贴一份比赛事件 CSV，MatchLens 以**可解释智能体**的方式跑完
 「感知 → 索引 → 检索 → 推理 → 解释 → 行动」闭环，产出：
 
@@ -14,13 +18,28 @@
 - **零依赖**：纯 Python 标准库
 - **100% 离线**：比赛数据不出本机
 - **非黑箱**：规则透明，公式写在 README 里，可手工复核
+- **双语输出**：`--lang zh|en`，全部文案经 i18n 层（转播/studio 出海场景）
+- **实时播报**：`--live` 按事件流逐条解说，15 分钟 xG 更新 + 半场/全场总结 + 自动战报
+- **合成数据**：`--gen SEED` 确定性生成整场合成比赛（扩展评测数据集）
 
 English version: [README.md](README.md)
 
 ## 快速开始
 
 ```bash
+# 批量分析（生成 HTML 报告）
 python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --html report.html
+
+# 实时播报模式（转播风格逐条解说；--delay 控制节奏）
+python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --live --delay 0.05
+
+# 英文输出
+python -m matchlens.cli examples/match_events.csv --teams examples/teams.csv --lang en
+
+# 生成一场新的合成比赛（种子 7 确定性可复现）
+python -m matchlens.cli --gen 7 --out examples/generated_match.csv --teams-out examples/generated_teams.csv
+
+# 评测
 python eval.py
 ```
 
@@ -30,35 +49,17 @@ python eval.py
 
 事件类型：`GOAL / SHOT / SHOT_ON_TARGET / PENALTY_MISSED / YELLOW_CARD / RED_CARD / SUB_IN / SUB_OUT`
 
-## 真实 demo 输出（examples/match_events.csv）
+## 实时播报示例（--live）
 
 ```
-比分: 蓝狮足球俱乐部 3 - 1 红鹰竞技
-  蓝狮: 3 球 | 射门 5 (射正 3) | xG 1.81 | 黄 1 红 0
-  红鹰: 1 球 | 射门 4 (射正 2) | xG 1.54 | 黄 0 红 1
-比赛形态: 比分悬殊但机会均等
-
-关键节点:
-   12' [进球  ] 蓝狮 张伟 进球（助攻来自 7 李雷）  (比分 1-0)
-   34' [进球  ] 红鹰 迭戈 进球（点球）  (比分 1-1)
-  45+2' [进球  ] 蓝狮 陈宇 进球（角球头球 助攻 7 李雷）  (比分 2-1)
-   67' [红牌  ] 红鹰 托马什 被红牌罚下（两黄变一红）
-   88' [进球  ] 蓝狮 赵蓬 进球（替补登场10分钟内建功）  (比分 3-1)
- 90+3' [失点  ] 蓝狮 陈宇 罚失点球（被门将扑出）
-
-洞察:
-  * 高效终结: 蓝狮打进 3 球但 xG 仅 1.81（超额 +1.19）
-  * 挥霍机会: 红鹰 xG 1.54 却只进 1 球（缺口 -0.54）
-  * 红牌连锁反应: 红鹰 67' 被罚下后本队 xG 1.39->0.15，被对手 xG 0.63->1.18
-  * 替补奇兵: 蓝狮替补赵蓬 78' 登场，88' 即取得进球
-  * 阶段压制: 75-90 分钟区间蓝狮 xG 0.87，红鹰 0.15
-  * 纪律数据: 蓝狮 1 黄 0 红；红鹰 0 黄 1 红
-
-战报: 蓝狮足球俱乐部 3-1 红鹰竞技。进球序列：12' 蓝狮 张伟 进球（助攻来自 7 李雷）；
-34' 红鹰 迭戈 进球（点球）；45+2' 蓝狮 陈宇 进球（角球头球 助攻 7 李雷）；
-88' 蓝狮 赵蓬 进球（替补登场10分钟内建功）。xG 1.81-1.54，两队创造的机会几乎均等，
-比分差距主要来自终结效率。红鹰 67' 被红牌罚下（托马什），此后长时间少打一人。
-替补赵蓬 78' 登场，88' 建功，成为胜负手之一。90+3' 蓝狮罚失点球（陈宇），悬念留到最后。
+⚽ 12' 进球！蓝狮足球俱乐部 9 张伟 (助攻来自 7 李雷) （比分 1-0）
+⏱ 15-30' xG 更新：蓝狮足球俱乐部 0.35, 红鹰竞技 0.18
+⚽ 34' 进球！红鹰竞技 8 迭戈 (点球) （比分 1-1）
+🪑 半场结束：1-1 | xG 蓝狮足球俱乐部 0.63, 红鹰竞技 0.97
+🟥 67' 红鹰竞技 5 托马什 被红牌罚下！ (两黄变一红)
+⚽ 88' 进球！蓝狮足球俱乐部 20 赵蓬 (替补登场10分钟内建功) （比分 3-1）
+🏁 全场结束：3-1 | xG 蓝狮足球俱乐部 1.81, 红鹰竞技 1.54 | 射门 蓝狮足球俱乐部 5, 红鹰竞技 4
+📝 自动战报：蓝狮足球俱乐部 3-1 红鹰竞技。进球序列：……
 ```
 
 ## 规则与公式（透明可复核）
@@ -86,11 +87,23 @@ EXPLAIN   生成洞察（附证据引用）+ 自然语言战报
 ACT       给出后续分析建议
 ```
 
+## 测试与质量
+
+`python eval.py` → **70 条断言全过**：demo 场解析、i18n 双语对齐、
+英文渲染、实时叙事器（比分推进/半场一次/确定性重放）、合成生成器
+（同种子字节级一致/可回读分析/事件量合理）、CLI 真子进程
+（中/英/实时/生成/HTML/错误退出码）。CI 在 Python 3.10/3.11/3.12 三版本运行。
+
 ## 参赛信息
 
 为 **Microsoft × Premier League「Inside the Game: Developer Hackathon」**
-（$50,000 现金奖池）构建：把比赛事件数据转化为**可解释的赛事情报与自动战报**，
-零依赖、可离线、结论可溯源。评测见 `eval.py`（19 条断言全 PASS）。
+（**$50,000 现金奖池**）构建。官方要点：
+
+- **注册截止 2026-10-20 12:00 PT**；构建期 10-06 ~ 10-27；**提交截止 2026-10-27 23:59 PT**；11-10 通知前六名
+- 命题：把合成足球数据转化为**可解释的赛事情报、实时叙事与自动战报**（studio/转播/流媒体场景）
+- MatchLens 对应：可解释情报（xG + 6 类洞察 + 证据引用）✓、实时叙事（`--live`）✓、
+  自动战报（模板化可溯源）✓、多语言（`--lang en`）✓、扩展数据集（`--gen`）✓
+- 报名入口：msft.it/6016aY5LY（Innovation Studio 平台）
 
 ## 免责声明
 
