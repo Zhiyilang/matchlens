@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import html
 
+from . import i18n
+
 _CSS = """
 * { box-sizing: border-box; }
 body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; background: #f4f6fa;
@@ -68,8 +70,8 @@ ul.ev li { font-family: Consolas, monospace; font-size: 12px; color: #475569;
 .foot { margin-top: 28px; font-size: 12px; color: #94a3b8; }
 """
 
-_BADGE = {"GOAL": ("进球", "#2e9e5b"), "PEN_MISS": ("失点", "#d64545"),
-          "RED": ("红牌", "#b91c1c"), "YELLOW": ("黄牌", "#d98e04")}
+_BADGE_COLOR = {"GOAL": "#2e9e5b", "PEN_MISS": "#d64545",
+                "RED": "#b91c1c", "YELLOW": "#d98e04"}
 _COLORS = {"BL": "#3b7dd8", "RH": "#d64545"}
 
 
@@ -77,7 +79,7 @@ def _esc(x):
     return html.escape(str(x))
 
 
-def write_html(result: dict, path: str) -> None:
+def write_html(result: dict, path: str, lang: str = "zh") -> None:
     names, stats = result["names"], result["stats"]
     teams = sorted(stats, key=lambda t: -stats[t]["goals"])
     max_xg = max((s["xg"] for s in stats.values()), default=1.0) or 1.0
@@ -98,21 +100,22 @@ def write_html(result: dict, path: str) -> None:
     timeline = "".join(
         "<div class='tl-item'>"
         f"<div class='tl-min'>{m['minute_raw']}'</div>"
-        f"<div class='tl-badge' style='background:{_BADGE.get(m['kind'], ('', '#666'))[1]}'>"
-        f"{_BADGE.get(m['kind'], ('事件', '#666'))[0]}</div>"
+        f"<div class='tl-badge' style='background:{_BADGE_COLOR.get(m['kind'], '#666')}'>"
+        f"{i18n.t(lang, 'html_badge_' + m['kind'].lower())}</div>"
         f"<div class='tl-team'>{_esc(names.get(m['team'], m['team']))}</div>"
         f"<div class='tl-text'>{_esc(m['text'])}</div>"
-        f"<div class='tl-score'>"
+        "<div class='tl-score'>"
         + "-".join(str(v) for _, v in sorted(m["score"].items()))
         + "</div></div>"
         for m in result["moments"])
 
     cards = "".join(
         "<div class='card'>"
-        f"<div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span>"
+        f"<div class='card-head'><span class='sev' style='background:#3b7dd8'>"
+        f"{i18n.t(lang, 'html_insight_badge')}</span>"
         f"<span class='title'>{_esc(f['title'])}</span></div>"
         f"<p class='detail'>{_esc(f['detail'])}</p>"
-        "<div class='lbl'>证据引用</div>"
+        f"<div class='lbl'>{i18n.t(lang, 'html_evidence')}</div>"
         f"<ul class='ev'>{''.join(f'<li>{_esc(e)}</li>' for e in f['evidence'])}</ul>"
         "</div>"
         for f in result["insights"])
@@ -123,34 +126,34 @@ def write_html(result: dict, path: str) -> None:
     actions = "".join(f"<li>{_esc(a)}</li>" for a in result["next_actions"])
 
     doc = f"""<!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="{'zh-CN' if lang == 'zh' else 'en'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MatchLens 战报</title>
+<title>{i18n.t(lang, 'html_title')}</title>
 <style>{_CSS}</style>
 </head>
 <body>
 <div class="wrap">
-  <h1>MatchLens — 可解释足球战报</h1>
-  <div class="sub">离线 · 零依赖 · 每条洞察均可溯源（文件/行号/分钟/球员）</div>
+  <h1>{i18n.t(lang, 'html_title')}</h1>
+  <div class="sub">{i18n.t(lang, 'html_sub')}</div>
   <div class="scoreboard">
     <div class="score-line">{score_html}</div>
-    <div class="form"><span>比赛形态：{_esc(result['label'])}</span></div>
-    <h2 style="margin-top:18px">xG 对比</h2>
+    <div class="form"><span>{i18n.t(lang, 'html_form')}: {_esc(result['label'])}</span></div>
+    <h2 style="margin-top:18px">{i18n.t(lang, 'html_xg')}</h2>
     {xg_rows}
   </div>
-  <h2>智能体闭环</h2>
+  <h2>{i18n.t(lang, 'html_steps')}</h2>
   <table>{steps}</table>
-  <h2>关键节点（{len(result['moments'])}）</h2>
+  <h2>{i18n.t(lang, 'html_moments', n=len(result['moments']))}</h2>
   <div class="timeline">{timeline}</div>
-  <h2>洞察（{len(result['insights'])}）</h2>
+  <h2>{i18n.t(lang, 'html_insights', n=len(result['insights']))}</h2>
   {cards}
-  <h2>自然语言战报</h2>
+  <h2>{i18n.t(lang, 'html_recap')}</h2>
   <div class="recap">{_esc(result['recap'])}</div>
-  <h2>后续分析建议</h2>
+  <h2>{i18n.t(lang, 'html_next')}</h2>
   <div class="actions"><ol>{actions}</ol></div>
-  <div class="foot">MatchLens v1.0 · 本报告基于事件数据生成，不构成任何投注建议。</div>
+  <div class="foot">{i18n.t(lang, 'html_foot')}</div>
 </div>
 </body>
 </html>
