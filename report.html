@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MatchLens 战报</title>
+<style>
+* { box-sizing: border-box; }
+body { font-family: "Segoe UI", "Microsoft YaHei", sans-serif; background: #f4f6fa;
+       color: #1f2933; margin: 0; padding: 32px; }
+.wrap { max-width: 880px; margin: 0 auto; }
+h1 { font-size: 24px; margin: 0 0 4px; }
+.sub { color: #64748b; font-size: 13px; margin-bottom: 24px; }
+.scoreboard { background: #fff; border-radius: 14px; padding: 24px;
+              box-shadow: 0 1px 3px rgba(15,23,42,.08); margin-bottom: 20px; }
+.score-line { display: flex; align-items: center; justify-content: center;
+              gap: 18px; font-size: 30px; font-weight: 700; }
+.score-line .team { flex: 1; text-align: center; font-size: 17px; }
+.score-line .num { font-size: 40px; color: #1f2933; }
+.score-line .vs { color: #94a3b8; font-size: 15px; }
+.form { text-align: center; margin-top: 10px; }
+.form span { display: inline-block; padding: 3px 14px; border-radius: 999px;
+             background: #eef2ff; color: #3b7dd8; font-size: 13px; font-weight: 600; }
+.xg-row { display: flex; align-items: center; gap: 10px; margin-top: 8px;
+          font-size: 13px; }
+.xg-row .lab { width: 110px; text-align: right; color: #64748b;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xg-row .bar-bg { flex: 1; background: #eef2f7; border-radius: 6px; height: 16px; }
+.xg-row .bar { height: 16px; border-radius: 6px; }
+.xg-row .val { width: 56px; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px;
+        overflow: hidden; box-shadow: 0 1px 3px rgba(15,23,42,.08); margin-bottom: 20px; }
+td { padding: 9px 14px; font-size: 13px; border-bottom: 1px solid #eef2f7;
+     vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+.st { font-weight: 700; color: #3b7dd8; white-space: nowrap; width: 90px; }
+h2 { font-size: 17px; margin: 26px 0 12px; }
+.timeline { background: #fff; border-radius: 12px; padding: 8px 20px;
+            box-shadow: 0 1px 3px rgba(15,23,42,.08); }
+.tl-item { display: flex; gap: 14px; padding: 11px 0;
+           border-bottom: 1px solid #eef2f7; align-items: baseline; }
+.tl-item:last-child { border-bottom: none; }
+.tl-min { font-family: Consolas, monospace; font-weight: 700; color: #3b7dd8;
+          min-width: 46px; }
+.tl-badge { font-size: 11px; font-weight: 700; color: #fff; padding: 1px 8px;
+            border-radius: 999px; }
+.tl-team { color: #64748b; font-size: 12px; min-width: 86px; }
+.tl-text { flex: 1; font-size: 13.5px; }
+.tl-score { font-family: Consolas, monospace; font-size: 12px; color: #94a3b8; }
+.card { background: #fff; border-radius: 12px; padding: 18px 20px; margin-bottom: 14px;
+        box-shadow: 0 1px 3px rgba(15,23,42,.08); border-left: 4px solid #cbd5e1; }
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.sev { color: #fff; font-size: 11px; font-weight: 700; padding: 2px 10px;
+       border-radius: 999px; }
+.title { font-size: 15px; font-weight: 700; }
+.detail { font-size: 13.5px; line-height: 1.6; margin: 0 0 10px; }
+.lbl { font-size: 11px; font-weight: 700; color: #64748b; letter-spacing: .05em;
+       margin: 8px 0 4px; }
+ul.ev { margin: 0 0 6px; padding-left: 18px; }
+ul.ev li { font-family: Consolas, monospace; font-size: 12px; color: #475569;
+           line-height: 1.7; word-break: break-all; }
+.recap { background: #fff; border-radius: 12px; padding: 20px 22px;
+         box-shadow: 0 1px 3px rgba(15,23,42,.08); font-size: 14px;
+         line-height: 1.9; }
+.actions { background: #fff; border-radius: 12px; padding: 18px 22px;
+           box-shadow: 0 1px 3px rgba(15,23,42,.08); }
+.actions ol { margin: 0; padding-left: 20px; }
+.actions li { font-size: 13.5px; line-height: 1.8; }
+.foot { margin-top: 28px; font-size: 12px; color: #94a3b8; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>MatchLens 战报</h1>
+  <div class="sub">离线 · 零依赖 · 每条洞察均可溯源（文件/行号/分钟/球员）</div>
+  <div class="scoreboard">
+    <div class="score-line"><div class='team'>蓝狮足球俱乐部</div><div class='num'>3</div><div class='vs'>VS</div><div class='team'>红鹰竞技</div><div class='num'>1</div></div>
+    <div class="form"><span>比赛形态: 比分悬殊但机会均等</span></div>
+    <h2 style="margin-top:18px">xG 对比</h2>
+    <div class='xg-row'><div class='lab'>蓝狮足球俱乐部</div><div class='bar-bg'><div class='bar' style='width:100%;background:#3b7dd8'></div></div><div class='val'>1.81</div></div><div class='xg-row'><div class='lab'>红鹰竞技</div><div class='bar-bg'><div class='bar' style='width:85%;background:#d64545'></div></div><div class='val'>1.54</div></div>
+  </div>
+  <h2>智能体闭环</h2>
+  <table><tr><td class='st'>PERCEIVE</td><td>读取 15 个比赛事件 | 球队 蓝狮足球俱乐部, 红鹰竞技</td></tr><tr><td class='st'>INDEX</td><td>按分钟排序，建立球员/事件类型/xG 索引，识别 7 个关键节点</td></tr><tr><td class='st'>RETRIEVE</td><td>统计射门/xG/纪律/换人数据，执行 5 类洞察规则，命中 6 条</td></tr><tr><td class='st'>REASON</td><td>计算比分走势与 xG 对比，判定比赛形态：比分悬殊但机会均等</td></tr><tr><td class='st'>EXPLAIN</td><td>生成 6 条洞察（每条附证据引用）与自然语言战报</td></tr><tr><td class='st'>ACT</td><td>给出 4 条后续分析建议</td></tr></table>
+  <h2>关键节点（7）</h2>
+  <div class="timeline"><div class='tl-item'><div class='tl-min'>12'</div><div class='tl-badge' style='background:#2e9e5b'>进球</div><div class='tl-team'>蓝狮足球俱乐部</div><div class='tl-text'>9 张伟 进球（助攻来自 7 李雷）</div><div class='tl-score'>1-0</div></div><div class='tl-item'><div class='tl-min'>34'</div><div class='tl-badge' style='background:#2e9e5b'>进球</div><div class='tl-team'>红鹰竞技</div><div class='tl-text'>8 迭戈 进球（点球）</div><div class='tl-score'>1-1</div></div><div class='tl-item'><div class='tl-min'>41'</div><div class='tl-badge' style='background:#d98e04'>黄牌</div><div class='tl-team'>蓝狮足球俱乐部</div><div class='tl-text'>4 王浩 黄牌（战术犯规）</div><div class='tl-score'>1-1</div></div><div class='tl-item'><div class='tl-min'>45+2'</div><div class='tl-badge' style='background:#2e9e5b'>进球</div><div class='tl-team'>蓝狮足球俱乐部</div><div class='tl-text'>10 陈宇 进球（角球头球 助攻 7 李雷）</div><div class='tl-score'>2-1</div></div><div class='tl-item'><div class='tl-min'>67'</div><div class='tl-badge' style='background:#b91c1c'>红牌</div><div class='tl-team'>红鹰竞技</div><div class='tl-text'>5 托马什 被红牌罚下（两黄变一红）</div><div class='tl-score'>2-1</div></div><div class='tl-item'><div class='tl-min'>88'</div><div class='tl-badge' style='background:#2e9e5b'>进球</div><div class='tl-team'>蓝狮足球俱乐部</div><div class='tl-text'>20 赵蓬 进球（替补登场10分钟内建功）</div><div class='tl-score'>3-1</div></div><div class='tl-item'><div class='tl-min'>90+3'</div><div class='tl-badge' style='background:#d64545'>失点</div><div class='tl-team'>蓝狮足球俱乐部</div><div class='tl-text'>10 陈宇 罚失点球（被门将扑出）</div><div class='tl-score'>3-1</div></div></div>
+  <h2>洞察（6）</h2>
+  <div class='card'><div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span><span class='title'>高效终结</span></div><p class='detail'>蓝狮足球俱乐部 打进 3 球但 xG 仅 1.81（超额 +1.19）——临门一脚明显高于平均水准。</p><div class='lbl'>证据引用</div><ul class='ev'><li>match_events.csv L2 12&#x27; BL GOAL 9 张伟 xG=0.35（助攻来自 7 李雷）</li><li>match_events.csv L6 45+2&#x27; BL GOAL 10 陈宇 xG=0.28（角球头球 助攻 7 李雷）</li><li>match_events.csv L11 71&#x27; BL SHOT 17 刘洋 xG=0.31（被门将扑出）</li><li>match_events.csv L15 88&#x27; BL GOAL 20 赵蓬 xG=0.22（替补登场10分钟内建功）</li><li>match_events.csv L16 90+3&#x27; BL PENALTY_MISSED 10 陈宇 xG=0.65（被门将扑出）</li></ul></div><div class='card'><div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span><span class='title'>挥霍机会</span></div><p class='detail'>红鹰竞技 xG 1.54 却只进 1 球（缺口 -0.54）——机会质量不差，转化率拖后腿。</p><div class='lbl'>证据引用</div><ul class='ev'><li>match_events.csv L3 23&#x27; RH SHOT 10 马尔科 xG=0.18（被门将扑出）</li><li>match_events.csv L4 34&#x27; RH GOAL 8 迭戈 xG=0.79（点球）</li><li>match_events.csv L7 58&#x27; RH SHOT_ON_TARGET 11 卢卡 xG=0.42（击中门柱）</li><li>match_events.csv L14 85&#x27; RH SHOT 19 阿列克斯 xG=0.15（偏出）</li></ul></div><div class='card'><div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span><span class='title'>红牌连锁反应</span></div><p class='detail'>红鹰竞技 67&#x27; 被罚下后：本队 xG 1.39-&gt;0.15，被对手 xG 0.63-&gt;1.18。</p><div class='lbl'>证据引用</div><ul class='ev'><li>match_events.csv L10 67&#x27; RH RED_CARD 5 托马什（两黄变一红）</li><li>match_events.csv L11 71&#x27; BL SHOT 17 刘洋 xG=0.31（被门将扑出）</li><li>match_events.csv L14 85&#x27; RH SHOT 19 阿列克斯 xG=0.15（偏出）</li><li>match_events.csv L15 88&#x27; BL GOAL 20 赵蓬 xG=0.22（替补登场10分钟内建功）</li><li>match_events.csv L16 90+3&#x27; BL PENALTY_MISSED 10 陈宇 xG=0.65（被门将扑出）</li></ul></div><div class='card'><div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span><span class='title'>替补奇兵</span></div><p class='detail'>蓝狮足球俱乐部 替补 20 赵蓬 78&#x27; 登场，88&#x27; 即取得进球。</p><div class='lbl'>证据引用</div><ul class='ev'><li>match_events.csv L13 78&#x27; BL SUB_IN 20 赵蓬（换下 9 张伟）</li><li>match_events.csv L15 88&#x27; BL GOAL 20 赵蓬 xG=0.22（替补登场10分钟内建功）</li></ul></div><div class='card'><div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span><span class='title'>阶段压制</span></div><p class='detail'>75-90 分钟区间 蓝狮足球俱乐部 xG 0.87，对手 0.15——该阶段明显占优。</p><div class='lbl'>证据引用</div><ul class='ev'><li>match_events.csv L14 85&#x27; RH SHOT 19 阿列克斯 xG=0.15（偏出）</li><li>match_events.csv L15 88&#x27; BL GOAL 20 赵蓬 xG=0.22（替补登场10分钟内建功）</li><li>match_events.csv L16 90+3&#x27; BL PENALTY_MISSED 10 陈宇 xG=0.65（被门将扑出）</li></ul></div><div class='card'><div class='card-head'><span class='sev' style='background:#3b7dd8'>洞察</span><span class='title'>纪律数据</span></div><p class='detail'>蓝狮足球俱乐部 1 黄 0 红；红鹰竞技 0 黄 1 红（全场共 1 黄 1 红）。</p><div class='lbl'>证据引用</div><ul class='ev'><li>match_events.csv L5 41&#x27; BL YELLOW_CARD 4 王浩（战术犯规）</li><li>match_events.csv L10 67&#x27; RH RED_CARD 5 托马什（两黄变一红）</li></ul></div>
+  <h2>自然语言战报</h2>
+  <div class="recap">蓝狮足球俱乐部 3-1 红鹰竞技。进球序列：12&#x27; 蓝狮足球俱乐部 9 张伟 进球（助攻来自 7 李雷）；34&#x27; 红鹰竞技 8 迭戈 进球（点球）；45+2&#x27; 蓝狮足球俱乐部 10 陈宇 进球（角球头球 助攻 7 李雷）；88&#x27; 蓝狮足球俱乐部 20 赵蓬 进球（替补登场10分钟内建功）。xG 1.81-1.54，两队创造的机会几乎均等，比分差距主要来自终结效率。红鹰竞技 67&#x27; 被红牌罚下（5 托马什），此后长时间少打一人。替补 20 赵蓬 78&#x27; 登场，88&#x27; 建功，成为胜负手之一。90+3&#x27; 蓝狮足球俱乐部 罚失点球（10 陈宇），悬念留到最后。</div>
+  <h2>后续分析建议</h2>
+  <div class="actions"><ol><li>把本场射门事件拆到球员维度，做 xG 贡献排名</li><li>对比赛季场均 xG/射门数，判断本场是否属于异常高效/低效</li><li>若有传球与站位数据，补传球网络与助攻链分析</li><li>对红牌、点球等关键节点回放录像，复核判罚与站位选择</li></ol></div>
+  <div class="foot">MatchLens v1.0 · 本报告基于事件数据生成，不构成任何投注建议。</div>
+</div>
+</body>
+</html>
