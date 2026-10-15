@@ -1,0 +1,35 @@
+minute,team,player,event_type,detail,xg
+3,BL,No.11,YELLOW_CARD,late challenge,
+5,BL,No.9,GOAL,inside box,0.25
+8,BL,No.10,SUB_IN,tactical,
+12,RH,No.1,GOAL,inside box,0.2
+16,BL,No.3,SHOT_ON_TARGET,long range,0.05
+19,BL,No.2,SHOT,inside box,0.12
+22,BL,No.10,SHOT,inside box,0.09
+23,BL,No.8,SHOT_ON_TARGET,long range,0.04
+26,RH,No.3,GOAL,header,0.24
+29,RH,No.6,SHOT_ON_TARGET,inside box,0.12
+30,BL,No.11,YELLOW_CARD,dissent,
+33,RH,No.8,GOAL,inside box,0.15
+36,BL,No.2,SHOT_ON_TARGET,inside box,0.09
+40,BL,No.3,SHOT,header,0.23
+42,BL,No.6,SHOT_ON_TARGET,inside box,0.08
+45,BL,No.10,SUB_IN,injury,
+46,BL,No.6,SHOT,inside box,0.07
+49,RH,No.8,SHOT_ON_TARGET,penalty,0.79
+51,BL,No.11,SHOT_ON_TARGET,inside box,0.2
+54,BL,No.10,SUB_IN,tactical,
+58,RH,No.2,SHOT_ON_TARGET,long range,0.03
+60,BL,No.8,GOAL,header,0.15
+61,BL,No.5,SHOT,long range,0.05
+63,RH,No.1,GOAL,inside box,0.15
+67,BL,No.3,SHOT,inside box,0.13
+70,RH,No.4,GOAL,penalty,0.78
+72,BL,No.1,GOAL,penalty,0.76
+75,BL,No.6,SHOT_ON_TARGET,inside box,0.08
+77,RH,No.10,SHOT_ON_TARGET,header,0.18
+79,RH,No.4,SHOT,inside box,0.17
+83,BL,No.7,SHOT_ON_TARGET,inside box,0.16
+86,BL,No.11,SUB_IN,fresh legs,
+89,RH,No.6,SUB_IN,fresh legs,
+90,BL,No.11,SUB_IN,fresh legs,
