@@ -93,11 +93,19 @@ ACT       produce next-step analysis suggestions
 
 ## Tests & quality
 
-`python eval.py` → **70 assertions passing**: demo-match analysis, i18n
+`python eval.py` → **79 assertions passing**: demo-match analysis, i18n
 parity, English rendering, the live narrator (score progression / single
 halftime call / deterministic replay), the synthetic generator
-(byte-identical per seed / round-trip analysis / realistic volume), and the
-CLI end-to-end via real subprocesses (zh/en/live/gen/HTML/exit codes).
+(byte-identical per seed / round-trip analysis / realistic volume), the
+CLI end-to-end via real subprocesses (zh/en/live/gen/HTML/exit codes), and
+the bilingual web demo over real HTTP (landing / report / live transcript /
+healthz / language fallback / 404).
+
+## Web demo
+
+`python app.py` serves a zero-dependency bilingual demo (landing page,
+full HTML report, live-narration transcript). Reads `PORT`, binds
+`0.0.0.0`; `render.yaml` included for one-click deploy.
 CI runs the same suite on Python 3.10 / 3.11 / 3.12.
 
 ## Contest Entry
