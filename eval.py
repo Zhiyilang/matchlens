@@ -188,6 +188,8 @@ with tempfile.TemporaryDirectory() as td:
     check("CLI --live 退出 0", p_live.returncode == 0)
     check("CLI --live 有 GOAL 播报与全场总结",
           "GOAL!" in p_live.stdout and "Full time" in p_live.stdout)
+    check("CLI --live 英文无全角标点泄漏",
+          not any(c in p_live.stdout for c in "；，。：（）"))
 
     p_gen = subprocess.run([PY, "-m", "matchlens.cli", "--gen", "42",
                             "--out", os.path.join(td, "cli_gen.csv"),
