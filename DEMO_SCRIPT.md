@@ -40,8 +40,8 @@
 ## 1:42–1:55 — Engineering quality + close
 
 - Visual: terminal tail + GitHub page
-- Narration: "79 assertions green, CI across three Python versions, byte-identical generator tests. MatchLens — agents propose, evidence decides. MIT-licensed, on GitHub."
-- Action: `python eval.py` tail shows `79/79 passed`; cut to GitHub repo page, freeze on URL
+- Narration: "80 assertions green, CI across three Python versions, byte-identical generator tests. MatchLens — agents propose, evidence decides. MIT-licensed, on GitHub."
+- Action: `python eval.py` tail shows `80/80 passed`; cut to GitHub repo page, freeze on URL
 
 ## Recording checklist
 
