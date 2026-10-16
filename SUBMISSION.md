@@ -93,7 +93,7 @@
 > matches to expand evaluation datasets. A zero-dependency web demo
 > (`app.py`, render.yaml included) serves the report and live transcript for
 > judging access. Pure Python standard library, 100% offline, MIT-licensed,
-> 79-assertion eval suite green on Python 3.10/3.11/3.12.
+> 80-assertion eval suite green on Python 3.10/3.11/3.12.
 
 **GitHub repo**: https://github.com/Zhiyilang/matchlens（public ✓）
 
@@ -105,7 +105,7 @@
 
 | 评审项 (20% each) | MatchLens 对应 | 演示位置 |
 |---|---|---|
-| Technological Implementation | 零依赖确定性引擎 + 79 断言 eval + 三版本 CI + 字节级一致生成器 | 视频 1:42-1:55 |
+| Technological Implementation | 零依赖确定性引擎 + 80 断言 eval + 三版本 CI + 字节级一致生成器 | 视频 1:42-1:55 |
 | Agentic Design & Innovation | 六阶段闭环 PERCEIVE→INDEX→RETRIEVE→REASON→EXPLAIN→ACT + MCP server | 视频 0:12-0:42 |
 | Real-World Impact | 转播/演播室即用：HTML 报告 + 双语 + 离线可跑（弱网内网场景） | 视频 1:05-1:42 |
 | User Experience & Presentation | 可访问 Web demo + 双语界面 + ≤2min 精剪视频 | 视频全程 |
@@ -116,7 +116,7 @@
 1. **可解释是硬约束**：每条洞察带证据引用，公式写进 README，可手工复核——正面回应 brief 的 "explainable"。
 2. **零依赖 + 全离线**：转播现场弱网/内网直接跑，与云端方案互补而非重复。
 3. **双语开箱即用**：i18n 覆盖 CLI/HTML/播报全文案。
-4. **工程质量可见**：79 断言 + CI 绿徽标 + 生成器确定性测试。
+4. **工程质量可见**：80 断言 + CI 绿徽标 + 生成器确定性测试。
 5. **合规优先**：仓库公开 ✓、英文材料 ✓、2 分钟视频 ✓、demo 无登录可访问 ✓。
 
 ## 风险与规避
