@@ -99,7 +99,9 @@
 
 **Demo video**: （录好后贴链接）
 
-**Testing access**: （部署后的 Web demo URL）
+**Testing access**: https://clauseguard-ai.app.workbuddy.host/?lang=en
+（已部署，免登录可访问；域名是工作区复用旧名，内容已核验为 MatchLens。
+英文首页 `?lang=en`，另有 `/report?lang=en` 战报、`/live?lang=en` 实时播报实录。）
 
 ## 评分映射（官方五项 → MatchLens）
 
