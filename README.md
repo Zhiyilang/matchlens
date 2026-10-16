@@ -93,7 +93,7 @@ ACT       produce next-step analysis suggestions
 
 ## Tests & quality
 
-`python eval.py` → **79 assertions passing**: demo-match analysis, i18n
+`python eval.py` → **80 assertions passing**: demo-match analysis, i18n
 parity, English rendering, the live narrator (score progression / single
 halftime call / deterministic replay), the synthetic generator
 (byte-identical per seed / round-trip analysis / realistic volume), the
