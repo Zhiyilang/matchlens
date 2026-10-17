@@ -61,7 +61,7 @@
 2. 等 Innovation Studio 邀请邮件 → 建项目
 3. 关联公开仓库 https://github.com/Zhiyilang/matchlens
 4. 部署 Web demo（render.yaml 一键 Render，或本地 `python app.py` 内网穿透）→ 拿到无登录可访问的 URL
-5. 按 DEMO_SCRIPT.md 录 ≤2:00 英文视频，传 YouTube(Unlisted)/优酷
+5. **视频已备好**（`matchlens_demo.mp4`，1:26 全英文）→ 传 YouTube(Unlisted)/优酷，链接贴进平台
 6. 10-27 23:59 PT 前在平台提交
 
 ## 平台字段（可直接复制）
@@ -97,21 +97,23 @@
 
 **GitHub repo**: https://github.com/Zhiyilang/matchlens（public ✓）
 
-**Demo video**: （录好后贴链接）
+**Demo video**: （1:26 成片已备好——`matchlens_demo.mp4`，传 YouTube(Unlisted)/优酷后贴链接）
 
 **Testing access**: https://clauseguard-ai.app.workbuddy.host/?lang=en
 （已部署，免登录可访问；域名是工作区复用旧名，内容已核验为 MatchLens。
 英文首页 `?lang=en`，另有 `/report?lang=en` 战报、`/live?lang=en` 实时播报实录。）
 
-## 评分映射（官方五项 → MatchLens）
+## 评分映射（官方五项 → MatchLens，视频时间戳按 1:26 成片）
 
-| 评审项 (20% each) | MatchLens 对应 | 演示位置 |
+| 评审项 (20% each) | MatchLens 对应 | 成片位置 |
 |---|---|---|
-| Technological Implementation | 零依赖确定性引擎 + 80 断言 eval + 三版本 CI + 字节级一致生成器 | 视频 1:42-1:55 |
-| Agentic Design & Innovation | 六阶段闭环 PERCEIVE→INDEX→RETRIEVE→REASON→EXPLAIN→ACT + MCP server | 视频 0:12-0:42 |
-| Real-World Impact | 转播/演播室即用：HTML 报告 + 双语 + 离线可跑（弱网内网场景） | 视频 1:05-1:42 |
-| User Experience & Presentation | 可访问 Web demo + 双语界面 + ≤2min 精剪视频 | 视频全程 |
+| Technological Implementation | 零依赖确定性引擎 + 80 断言 eval + 三版本 CI + 逐字节一致生成器 | 视频 0:02–0:09（生成器）+ 1:14–1:22（eval/CI） |
+| Agentic Design & Innovation | 六阶段闭环 PERCEIVE→INDEX→RETRIEVE→REASON→EXPLAIN→ACT + MCP server | 视频 0:09–0:38 |
+| Real-World Impact | 转播/演播室即用：HTML 报告 + 双语 + 离线可跑（弱网内网场景） | 视频 0:38–1:14 |
+| User Experience & Presentation | 可访问 Web demo + 双语界面 + 1:26 精剪视频（≤2:00 硬限内） | 视频全程 |
 | Adherence to Category | brief 六条全覆盖：实时分析/战报/解释/数据扩展/多语言/个性化 | 视频各段 |
+
+> **视频已产出**：`matchlens_demo.mp4`（1:26 / 全英文 / 真实命令实录 / seed 17 英文队名场次），分段图见 `DEMO_SCRIPT.md`——上传 YouTube(Unlisted)/优酷即可，无需再录。
 
 ## 差异化卖点（评委视角）
 
